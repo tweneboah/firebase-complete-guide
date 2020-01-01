@@ -19,39 +19,9 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 
-const database = firebase.database()
-
-
-//CREATING DATABASE
-database.ref()
-  .set({
-    //set helps to write to our database
-    name: "Emmanuel",
-    country: {
-      city: 'Ghana',
-      school: 'KNUST'
-    }
-  }); //This get to the root of our database; //This gives all database features CRUD
-
-
-
-//CONNECT TO DATABASE
-
-import * as firebase from "firebase"; //This grabs all the firebase methods
-
-//CONNECT TO DATABASE
-const firebaseConfig = {
-  apiKey: "AIzaSyDL55S7bs4ZSykofpQ1qoSwDD448Q1Lu_o",
-  authDomain: "fir-complete-guide.firebaseapp.com",
-  databaseURL: "https://fir-complete-guide.firebaseio.com",
-  projectId: "fir-complete-guide",
-  storageBucket: "fir-complete-guide.appspot.com",
-  messagingSenderId: "783169070870",
-  appId: "1:783169070870:web:959e51966e5a23c0ed5237",
-  measurementId: "G-60J988Q1XS",
-};
-
-firebase.initializeApp(firebaseConfig);
+//AUTHENTICATION
+//PROVIDE A PROVIDER
+const googleProvider = new firebase.auth.GoogleAuthProvider()
 
 const database = firebase.database()
 
@@ -215,13 +185,14 @@ const database = firebase.database()
 
 export {
   firebase,
-  database
+  database,
+  googleProvider
 }
 
 
 
 
-import database from '../firebase/firebasePromise';
+//import database from '../firebase/firebasePromise';
 
 //create a new database
 //============================
@@ -268,26 +239,96 @@ import database from '../firebase/firebasePromise';
 //You need an id and a fuction where to get the id
 
 
-const remeveNote = (id) => {
-  return database.ref(`notes/${id}`).remove().then(() => {
-    console.log(`Data removed`)
-  }).catch((e) => {
-    console.log(`Error occured`)
-  })
+// const remeveNote = (id) => {
+//   return database.ref(`notes/${id}`).remove().then(() => {
+//     console.log(`Data removed`)
+//   }).catch((e) => {
+//     console.log(`Error occured`)
+//   })
+// }
+
+
+
+// //UPDATE
+// //=======================
+
+// //This requires the id and the object to update
+
+// const updateNote = (id, dataTobeUpdated) => {
+//   return database.ref(`notes/${id}`).update(dataTobeUpdated).then(() => {
+
+//   }).catch(() => {
+
+//   })
+// }
+
+
+
+//AUTHENTICATION
+
+//This functions runs when a user logs in and out
+
+firebase.auth().onAuthStateChanged((user) => {
+  if (user) {
+
+    //Store the user id in our app
+    const userId = user.uid;
+    //Keep track of this user when using redux we will create a userreduver and action
+
+
+    console.log(`user is signed in`)
+    //REDIRECT AFTER LOGING/LOGOUT
+    //Install history but i think it's part of router dom
+
+
+
+  } else {
+    console.log(`Login out`)
+    this.props.history.push('')
+  }
+});
+
+
+const loginUser = () => {
+  return firebase.auth().signInWithPopup(googleProvider)
+}
+//Call this on a button click
+
+
+//LOGOUT
+
+const logoutUser = () => {
+  return firebase.auth().signOut()
 }
 
 
+//PROTECTING ROUTES
 
-//UPDATE
-//=======================
+//modify the routes component
+//create a private Route and this will render the component
 
-//This requires the id and the object to update
+//create it folder
 
-const updateNote = (id, dataTobeUpdated) => {
-  return database.ref(`notes/${id}`).update(dataTobeUpdated).then(() => {
+//import these, react, Route from react-router-dom, redirect
 
-  }).catch(() => {
 
-  })
+
+const PrivateRoute = ({ isAuthenticated, component: Component, ...rest }) => {
+  //These props contains the component going to be rendered by this component and graps all the other props from the component been passed through this example exact path and others. The ...rest means the other props we didn't destructured
+  return (
+    <Route ...rest, component={(props) => {
+      //We difine our logic here
+      //pass all the props to route and this will pass to individual components
+      isAuthenticated ? (
+        <Component ...props />
+      ) : (
+          <Redirect to='/' />
+        )
+
+    }} />
+  );
 }
+
+export default PrivateRoute;
+
 ```
